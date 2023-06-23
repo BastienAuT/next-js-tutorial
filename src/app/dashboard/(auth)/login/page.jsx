@@ -1,39 +1,46 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { getProviders, signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
-const Login = ({ url }) => {
-  const session = useSession();
+const Login = () => {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const params = useSearchParams();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    setError(params.get("error"));
-    setSuccess(params.get("success"));
-  }, [params]);
+    setError(router.query.error);
+    setSuccess(router.query.success);
+  }, [router.query]);
 
-  if (session.status === "loading") {
+  if (status === "loading") {
     return <p>Loading...</p>;
   }
 
-  if (session.status === "authenticated") {
-    router?.push("/dashboard");
+  if (session) {
+    router.replace("/dashboard");
+    return null;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target[0].value;
     const password = e.target[1].value;
 
-    signIn("credentials", {
-      email,
-      password,
-    });
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // Prevent automatic redirect
+      });
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      setError("Authentication failed");
+    }
   };
 
   return (
