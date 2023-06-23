@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React, { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { getProviders, signIn, useSession } from "next-auth/react";
@@ -11,10 +11,18 @@ const Login = ({ url }) => {
   const params = useSearchParams();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [providers, setProviders] = useState({}); // Add a state for providers
 
   useEffect(() => {
     setError(params.get("error"));
     setSuccess(params.get("success"));
+
+    // Fetch the providers on component mount
+    const fetchProviders = async () => {
+      const response = await getProviders();
+      setProviders(response); // Save the providers in state
+    };
+    fetchProviders();
   }, [params]);
 
   if (session.status === "loading") {
@@ -69,14 +77,16 @@ const Login = ({ url }) => {
       <Link className={styles.link} href="/dashboard/register">
         Create new account
       </Link>
-      {/* <button
-        onClick={() => {
-          signIn("github");
-        }}
-        className={styles.button + " " + styles.github}
-      >
-        Login with Github
-      </button> */}
+      {/* Render the login options using the providers */}
+      {Object.values(providers).map((provider) => (
+        <button
+          key={provider.id}
+          onClick={() => signIn(provider.id)}
+          className={styles.button}
+        >
+          Login with {provider.name}
+        </button>
+      ))}
     </div>
   );
 };
