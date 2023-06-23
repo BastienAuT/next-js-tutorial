@@ -1,15 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "images.pexels.com",
-    ]
-  }
-}
-
-module.exports = nextConfig
-
-module.exports = {
+    domains: ["images.pexels.com"],
+  },
   async headers() {
     return [
       {
@@ -31,3 +24,5 @@ module.exports = {
     ];
   },
 };
+
+module.exports = nextConfig;
